@@ -1,0 +1,37 @@
+# Microservicio de reportes de Mejor Vejez. No tiene base de datos:
+# habla con el servicio core por la red interna de Dokploy. No necesita
+# dominio público: sus rutas internas (/api/interno/**) solo se usan entre
+# servicios, protegidas con la clave de servicio.
+services:
+  mejor-vejez-reportes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8082
+      # ── Comunicación entre microservicios (obligatorias) ─────────────────
+      CORE_URL: ${CORE_URL:-http://mejor-vejez-api:8080}
+      CLAVE_SERVICIO: ${CLAVE_SERVICIO:?falta CLAVE_SERVICIO}
+      ALERTAS_URL: ${ALERTAS_URL:-http://mejor-vejez-alertas:8081}
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+    expose:
+      - "8082"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8082/api/salud"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - dokploy-network
+
+# Sólo la red de Dokploy: `default` apunta a ella para que Compose NO cree la
+# red `<proyecto>_default` (el servidor se queda sin rangos de IP si cada app
+# crea la suya).
+networks:
+  default:
+    name: dokploy-network
+    external: true
+  dokploy-network:
+    external: true
