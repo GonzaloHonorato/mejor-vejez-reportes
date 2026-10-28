@@ -14,6 +14,9 @@ services:
       CORE_URL: ${CORE_URL:-http://mejor-vejez-api:8080}
       CLAVE_SERVICIO: ${CLAVE_SERVICIO:?falta CLAVE_SERVICIO}
       ALERTAS_URL: ${ALERTAS_URL:-http://mejor-vejez-alertas:8081}
+      # Cron del reporte semanal (America/Santiago): primera corrida 08:00, luego cada hora hasta las 20:00.
+      REPORTES_CRON: "${REPORTES_CRON:-0 0 8-20 * * MON}"
+      PROCESOS_HABILITADOS: ${PROCESOS_HABILITADOS:-true}
       JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
     expose:
       - "8082"

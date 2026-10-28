@@ -21,13 +21,29 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
+		<!-- Generación del PDF del reporte semanal, en memoria (versión 2.x estable). -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
+			<groupId>com.github.librepdf</groupId>
+			<artifactId>openpdf</artifactId>
+			<version>2.2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Spring Boot no gestiona esta versión: se fija explícitamente (okhttp 5.x estable). -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>mockwebserver3</artifactId>
+			<version>5.5.1</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Solo para que las pruebas lean el texto del PDF generado en memoria (PDFBox 3.x estable). -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.5</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
