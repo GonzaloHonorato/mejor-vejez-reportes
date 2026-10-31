@@ -219,7 +219,7 @@ public class ServicioReporteSemanal {
             RespuestaReservaEnvio reserva, List<String> errores) {
         String claveEnvio = "REP-SEM-" + grupo.idGrupo() + "-" + inicio.format(CLAVE_FECHA);
         String nombreArchivo = "reporte-semanal-" + inicio + ".pdf";
-        String asunto = "Mejor Vejez · Reporte semanal " + grupo.nombreGrupo() + " (" + inicio.format(ASUNTO_FECHA)
+        String asunto = "Cuida+ · Reporte semanal " + grupo.nombreGrupo() + " (" + inicio.format(ASUNTO_FECHA)
                 + " al " + reporte.periodo().fin().format(ASUNTO_FECHA) + ")";
         String cuerpo = "Se adjunta el reporte semanal de cumplimiento del grupo " + grupo.nombreGrupo()
                 + ". Este correo se genera automáticamente; no es necesario responder.";

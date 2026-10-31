@@ -46,7 +46,7 @@ public class GeneradorPdf {
 
     private static final Locale LOCALE_NUMEROS = Locale.of("es", "CL");
 
-    private static final String NOTA_PIE = "Reporte generado automáticamente por Mejor Vejez. "
+    private static final String NOTA_PIE = "Reporte generado automáticamente por Cuida+. "
             + "No se almacena una copia.";
     private static final String SIN_VALOR = "-";
     private static final String SIN_SEMANA_ANTERIOR = "Sin semana anterior";
@@ -86,7 +86,7 @@ public class GeneradorPdf {
     }
 
     private void agregarEncabezado(Document documento, ReporteSemanal reporte) throws DocumentException {
-        documento.add(new Paragraph("Mejor Vejez · Reporte semanal " + reporte.grupo().nombre(), FUENTE_TITULO));
+        documento.add(new Paragraph("Cuida+ · Reporte semanal " + reporte.grupo().nombre(), FUENTE_TITULO));
         String periodo = "lunes " + reporte.periodo().inicio().format(FECHA) + " a domingo "
                 + reporte.periodo().fin().format(FECHA);
         documento.add(new Paragraph("Período: " + periodo, FUENTE_SUBTITULO));
@@ -188,16 +188,22 @@ public class GeneradorPdf {
 
     private Paragraph parrafoAlertas(ResumenAlertas alertas) {
         StringBuilder texto = new StringBuilder();
-        texto.append("Alertas: total ").append(alertas.total());
-        texto.append(" (atrasos ").append(alertas.atrasos());
-        texto.append(", citas ").append(alertas.citas());
-        texto.append(", reposición ").append(alertas.reposiciones()).append(")");
-        texto.append(" · cerradas ").append(alertas.cerradas());
-        texto.append(" · abiertas ").append(alertas.abiertas());
+        texto.append("Alertas: ").append(alertas.total()).append(" en total");
+        texto.append(" (").append(EtiquetasCatalogo.tipoAlerta("ATRASO_TAREA")).append(": ").append(alertas.atrasos());
+        texto.append(", ").append(EtiquetasCatalogo.tipoAlerta("CITA_PROXIMA")).append(": ").append(alertas.citas());
+        texto.append(", ").append(EtiquetasCatalogo.tipoAlerta("REPOSICION_MEDICAMENTO")).append(": ")
+                .append(alertas.reposiciones()).append(")");
+        texto.append(" · ").append(conteo(alertas.cerradas(), "cerrada", "cerradas"));
+        texto.append(" · ").append(conteo(alertas.abiertas(), "abierta", "abiertas"));
         texto.append(" · prom. cierre: ").append(formatearMinutos(alertas.minutosPromedioCierre()));
         Paragraph parrafo = new Paragraph(texto.toString(), FUENTE_TEXTO);
         parrafo.setSpacingAfter(4f);
         return parrafo;
+    }
+
+    /** Cantidad con su palabra en singular o plural ("1 abierta", "0 abiertas"). */
+    private static String conteo(int cantidad, String singular, String plural) {
+        return cantidad + " " + (cantidad == 1 ? singular : plural);
     }
 
     private void agregarCumplimientoPorResponsable(Document documento, List<ResumenResponsable> responsables)

@@ -4,8 +4,8 @@ import java.util.Map;
 
 /**
  * Traduce los códigos reales del catálogo del core (tipo de tarea, estado
- * de tarea y estado de relevo) a una etiqueta legible en español para el
- * PDF. Un código que no está en el mapa se muestra tal cual, para que un
+ * de tarea, estado de relevo y tipo de alerta) a una etiqueta legible en
+ * español para el PDF, con las mismas etiquetas que muestra la web. Un código que no está en el mapa se muestra tal cual, para que un
  * catálogo nuevo nunca rompa la generación del reporte.
  */
 final class EtiquetasCatalogo {
@@ -27,6 +27,11 @@ final class EtiquetasCatalogo {
             "COMPLETADA", "Completada",
             "CANCELADA", "Cancelada");
 
+    private static final Map<String, String> TIPOS_ALERTA = Map.of(
+            "ATRASO_TAREA", "Tarea atrasada",
+            "REPOSICION_MEDICAMENTO", "Reposición de medicamento",
+            "CITA_PROXIMA", "Cita próxima");
+
     private EtiquetasCatalogo() {
     }
 
@@ -40,6 +45,10 @@ final class EtiquetasCatalogo {
 
     static String estadoRelevo(String codigo) {
         return etiqueta(ESTADOS_RELEVO, codigo);
+    }
+
+    static String tipoAlerta(String codigo) {
+        return etiqueta(TIPOS_ALERTA, codigo);
     }
 
     private static String etiqueta(Map<String, String> mapa, String codigo) {

@@ -194,7 +194,7 @@ class ServicioReporteSemanalTest {
                 .contains("\"nombreArchivo\":\"reporte-semanal-2026-11-02.pdf\"");
         // Asunto y cuerpo exactos del correo.
         assertThat(cuerpoSolicitud)
-                .contains("\"asunto\":\"Mejor Vejez · Reporte semanal Familia Pérez (02-11 al 08-11)\"");
+                .contains("\"asunto\":\"Cuida+ · Reporte semanal Familia Pérez (02-11 al 08-11)\"");
         assertThat(cuerpoSolicitud).contains("\"cuerpo\":\"Se adjunta el reporte semanal de cumplimiento del "
                 + "grupo Familia Pérez. Este correo se genera automáticamente; no es necesario responder.\"");
     }

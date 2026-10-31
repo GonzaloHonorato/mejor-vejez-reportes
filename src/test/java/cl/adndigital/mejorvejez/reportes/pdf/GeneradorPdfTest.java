@@ -117,7 +117,7 @@ class GeneradorPdfTest {
         assertThat(texto).contains("Tareas pendientes").contains("Alertas abiertas");
         // Nota al pie, texto exacto.
         assertThat(texto)
-                .contains("Reporte generado automáticamente por Mejor Vejez. No se almacena una copia.");
+                .contains("Reporte generado automáticamente por Cuida+. No se almacena una copia.");
     }
 
     @Test
@@ -135,6 +135,48 @@ class GeneradorPdfTest {
         assertThat(texto).doesNotContain("Requiere seguimiento");
         // El adulto no tuvo tareas la semana anterior: sin variación, nunca un "-" ambiguo.
         assertThat(texto).contains("Sin semana anterior");
+    }
+
+    @Test
+    void alertasUsanLasEtiquetasDeTipoDeLaWebConSuCantidad() throws Exception {
+        ResumenAlertas alertas = new ResumenAlertas(6, 3, 1, 2, 5, 1, null);
+        ResumenAdulto adulto = new ResumenAdulto("Adulto Uno", 1, 1, 0, null, 0, 0, 0,
+                List.of(fila(2, 9, "Cuidadora Ana")), List.of(), alertas, null);
+        ResumenResponsable responsable = new ResumenResponsable("Cuidadora Ana", 1, 1, 0, null, 0, 0, 0, 100.0, null,
+                false);
+        ReporteSemanal reporte = new ReporteSemanal(new GrupoReportado(5, "Familia Alertas"),
+                Periodo.desdeInicio(java.time.LocalDate.of(2026, 11, 2)), List.of(adulto), List.of(responsable),
+                OffsetDateTime.of(2026, 11, 9, 8, 30, 0, 0, SANTIAGO));
+
+        String texto = textoDe(generador.generar(reporte)).replaceAll("\\s+", " ");
+
+        assertThat(texto).contains("Alertas: 6 en total");
+        assertThat(texto).contains("Tarea atrasada: 3");
+        assertThat(texto).contains("Cita próxima: 1");
+        assertThat(texto).contains("Reposición de medicamento: 2");
+        assertThat(texto).contains("5 cerradas").contains("1 abierta");
+        assertThat(texto).doesNotContain("atrasos").doesNotContain("reposición 2").doesNotContain("citas 1");
+    }
+
+    @Test
+    void alertasEnSingularYSinAlertas() throws Exception {
+        ResumenAlertas una = new ResumenAlertas(1, 1, 0, 0, 1, 0, null);
+        ResumenAlertas ninguna = new ResumenAlertas(0, 0, 0, 0, 0, 0, null);
+        ResumenAdulto conUna = new ResumenAdulto("Adulto Uno", 1, 1, 0, null, 0, 0, 0,
+                List.of(fila(2, 9, "Cuidadora Ana")), List.of(), una, null);
+        ResumenAdulto sinAlertas = new ResumenAdulto("Adulto Dos", 1, 1, 0, null, 0, 0, 0,
+                List.of(fila(3, 9, "Cuidadora Ana")), List.of(), ninguna, null);
+        ResumenResponsable responsable = new ResumenResponsable("Cuidadora Ana", 2, 2, 0, null, 0, 0, 0, 100.0, null,
+                false);
+        ReporteSemanal reporte = new ReporteSemanal(new GrupoReportado(6, "Familia Singular"),
+                Periodo.desdeInicio(java.time.LocalDate.of(2026, 11, 2)), List.of(conUna, sinAlertas),
+                List.of(responsable), OffsetDateTime.of(2026, 11, 9, 8, 30, 0, 0, SANTIAGO));
+
+        String texto = textoDe(generador.generar(reporte)).replaceAll("\\s+", " ");
+
+        assertThat(texto).contains("Alertas: 1 en total").contains("Tarea atrasada: 1").contains("1 cerrada")
+                .contains("0 abiertas");
+        assertThat(texto).contains("Alertas: 0 en total").contains("0 cerradas");
     }
 
     @Test
