@@ -356,6 +356,54 @@ class CalculadoraReporteTest {
         assertThat(variacion.porcentajeATiempoPuntos()).isEqualTo(35.0); // 60 - 25
     }
 
+    /**
+     * CP-49: las alertas se cuentan por tipo y por estado, y el promedio de
+     * cierre usa solo las cerradas con fecha de revisión; las abiertas al
+     * cierre del período quedan fuera del promedio.
+     */
+    @Test
+    void resumenDeAlertasPorTipoYPromedioDeCierre() {
+        Persona ana = new Persona(100L, "Cuidadora Ana");
+        TareaSemana tarea = tareaATiempo(1, 1, ana, hora(LUNES, 9, 0, 0));
+        List<AlertaSemana> alertas = List.of(
+                new AlertaSemana(1, 1, "ATRASO_TAREA", hora(LUNES, 9, 30, 0), "CERRADA", hora(LUNES, 9, 40, 0)),
+                new AlertaSemana(2, 1, "CITA_PROXIMA", hora(LUNES, 10, 0, 0), "CERRADA", hora(LUNES, 10, 30, 0)),
+                new AlertaSemana(3, 1, "REPOSICION_MEDICAMENTO", hora(LUNES, 11, 0, 0), "ABIERTA", null),
+                new AlertaSemana(4, 1, "ATRASO_TAREA", hora(LUNES, 12, 0, 0), "ABIERTA", null),
+                // Alerta de otro adulto: no cuenta en el resumen de este.
+                new AlertaSemana(5, 2, "ATRASO_TAREA", hora(LUNES, 12, 0, 0), "CERRADA", hora(LUNES, 15, 0, 0)));
+        DatosSemana actual = semana(LUNES, List.of(new AdultoSemana(1, "Adulto Uno")), List.of(tarea), List.of(),
+                alertas);
+
+        ReporteSemanal reporte = calculadora.calcular(actual, semanaVacia(LUNES_ANTERIOR)).orElseThrow();
+
+        ResumenAlertas resumen = reporte.adultos().get(0).alertas();
+        assertThat(resumen.total()).isEqualTo(4);
+        assertThat(resumen.atrasos()).isEqualTo(2);
+        assertThat(resumen.citas()).isEqualTo(1);
+        assertThat(resumen.reposiciones()).isEqualTo(1);
+        assertThat(resumen.cerradas()).isEqualTo(2);
+        assertThat(resumen.abiertas()).isEqualTo(2);
+        // (10 + 30) / 2 = 20 minutos.
+        assertThat(resumen.minutosPromedioCierre()).isCloseTo(20.0, within(0.001));
+    }
+
+    /** CP-49: sin alertas cerradas no hay datos suficientes y el promedio queda vacío. */
+    @Test
+    void sinAlertasCerradasNoHayPromedioDeCierre() {
+        Persona ana = new Persona(100L, "Cuidadora Ana");
+        TareaSemana tarea = tareaATiempo(1, 1, ana, hora(LUNES, 9, 0, 0));
+        DatosSemana actual = semana(LUNES, List.of(new AdultoSemana(1, "Adulto Uno")), List.of(tarea), List.of(),
+                List.of(new AlertaSemana(1, 1, "ATRASO_TAREA", hora(LUNES, 9, 30, 0), "ABIERTA", null)));
+
+        ReporteSemanal reporte = calculadora.calcular(actual, semanaVacia(LUNES_ANTERIOR)).orElseThrow();
+
+        ResumenAlertas resumen = reporte.adultos().get(0).alertas();
+        assertThat(resumen.abiertas()).isEqualTo(1);
+        assertThat(resumen.cerradas()).isZero();
+        assertThat(resumen.minutosPromedioCierre()).isNull();
+    }
+
     @Test
     void emparejamientoPorIdEntreSemanas() {
         Persona ana = new Persona(100L, "Cuidadora Ana");
